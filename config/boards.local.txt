@@ -1,0 +1,12 @@
+esp32wrover.menu.UploadSpeed=115200
+esp32wrover.menu.UploadSpeed.upload.speed=115200
+esp32.menu.UploadSpeed=115200
+esp32.menu.UploadSpeed.upload.speed=115200
+
+esp32wrover.menu.FlashSize.4M=4MB
+esp32wrover.menu.FlashSize.4M.build.flash_size=4MB
+esp32wrover.menu.FlashSize=4M
+
+esp32.menu.FlashSize.4M=4MB
+esp32.menu.FlashSize.4M.build.flash_size=4MB
+esp32.menu.FlashSize=4M
