@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.2.4">
+  <diagram id="HVAC" name="MiniHVAC Architecture">
+    <mxGraphModel dx="1106" dy="609" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16" value="USUARIO&#xa;• Operador&#xa;• Lectura LCD/LEDs&#xa;• Pulsación botones" vertex="1">
+          <mxGeometry height="110" width="300" x="280" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="controlLayer" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=16" value="                                                              CAPA DE CONTROL (PC)&#xa;                                                              MATLAB / SIMULINK" vertex="1">
+          <mxGeometry height="520" width="560" x="150" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="minihvac" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="Modelo MiniHVAC_Zone&#xa;(T_sim, RH_sim)" vertex="1">
+          <mxGeometry height="80" width="250" x="200" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="thermo" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="Thermostat_Logic&#xa;(modos, consignas, HVAC on/off)" vertex="1">
+          <mxGeometry height="80" width="250" x="200" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="control" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="Control_Simulink&#xa;(PI/PID – señales de mando)" vertex="1">
+          <mxGeometry height="80" width="250" x="200" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="alarms" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="Alarms_Logic&#xa;(alarm_flag, condiciones de fallo)" vertex="1">
+          <mxGeometry height="80" width="250" x="200" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="esp32Interface" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="ESP32_Interface&#xa;(Codificación UART – structs 24–32B)" vertex="1">
+          <mxGeometry height="80" width="250" x="200" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="embedded" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=16" value="                                                                           CAPA EMBEBIDA (ESP32 +                                                                                           FreeRTOS)" vertex="1">
+          <mxGeometry height="380" width="560" x="150" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="taskrx" parent="embedded" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="TaskRX&#xa;(UART RX → comandos PC)" vertex="1">
+          <mxGeometry height="70" width="200" x="60" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="tasktx" parent="embedded" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="TaskTX&#xa;(Estados → PC)" vertex="1">
+          <mxGeometry height="70" width="200" x="320" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="tasklcd" parent="embedded" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="TaskLCD&#xa;(modo, alarmas, valores)" vertex="1">
+          <mxGeometry height="70" width="200" x="320" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="actuadores" parent="embedded" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="Actuadores&#xa;(ventilador, resistencia, humidificador)" vertex="1">
+          <mxGeometry height="70" width="300" x="250" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="edge9" edge="1" parent="embedded" source="tasklcd" target="actuadores">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tasksens" parent="embedded" style="rounded=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#000000;fontSize=14" value="TaskSensores&#xa;(DHT11, T_real, RH_real)" vertex="1">
+          <mxGeometry height="70" width="200" x="60" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" edge="1" parent="embedded" source="taskrx" target="tasksens">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" edge="1" parent="embedded" source="tasksens" target="tasklcd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="environment" parent="1" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=16" value="ENTORNO FÍSICO (Mini-HVAC real)" vertex="1">
+          <mxGeometry height="90" width="460" x="200" y="1230" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" edge="1" parent="1" source="user" target="controlLayer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" edge="1" parent="1" source="minihvac" target="thermo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" edge="1" parent="1" source="thermo" target="control">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" edge="1" parent="1" source="control" target="alarms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" edge="1" parent="1" source="alarms" target="esp32Interface">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" edge="1" parent="1" source="esp32Interface" target="embedded">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge10" edge="1" parent="1" source="embedded" target="environment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
