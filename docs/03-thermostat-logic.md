@@ -127,16 +127,16 @@ The subsystem exposes the following outputs:
 4. `error_T`  
    - Description: Temperature error between setpoint and simulated value.  
    - Definition:  
-     \\[  
-     error\_T = T\_{set} - T\_{sim}  
-     \\]
+     $$
+     error_T = T_{set} - T_{sim}
+     $$
 
 5. `error_RH`  
    - Description: Relative humidity error between setpoint and simulated value.  
    - Definition:  
-     \\[  
-     error\_{RH} = RH\_{set} - RH\_{sim}  
-     \\]
+     $$
+     error_{RH} = RH_{set} - RH_{sim}
+     $$
 
 These two error signals are intended for later use in:
 
@@ -180,14 +180,14 @@ This is critical for the rest of the project because:
 Two **Sum** blocks are used in Simulink (configured as `|+-`) to calculate the errors:
 
 - Temperature error:  
-  \\[  
-  error\_T = T\_{set} - T\_{sim}  
-  \\]
+  $$
+  error_T = T_{set} - T_{sim}
+  $$
 
 - Relative humidity error:  
-  \\[  
-  error\_{RH} = RH\_{set} - RH\_{sim}  
-  \\]
+  $$
+  error_{RH} = RH_{set} - RH_{sim}
+  $$
 
 Implementation:
 

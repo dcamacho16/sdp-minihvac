@@ -71,49 +71,49 @@ The goal is not to build an exact industrial HVAC model, but rather a **simplifi
 
 The room temperature is modeled as a first-order system with heating input, thermal losses to the environment, and the effect of ventilation:
 
-\[
+$$
 C \, \frac{dT}{dt} = P_{heater} \, u_{heater} - k_{loss} \, (T - T_{amb}) - k_{fan} \, u_{fan} \, (T - T_{amb})
-\]
+$$
 
 where:
 
-- \(T\) : room temperature (ºC) → `T_sim`
-- \(T_{amb}\) : ambient temperature (ºC) → `T_amb`
-- \(C\) : effective thermal capacity of the room  
-- \(P_{heater}\) : nominal heater power
-- \(k_{loss}\) : thermal loss coefficient to the environment
-- \(k_{fan}\) : forced-exchange coefficient due to the fan
-- \(u_{heater}\) : heater command → `u_heater_cmd`
-- \(u_{fan}\) : fan command → `u_fan_cmd`
+- $T$ : room temperature (ºC) → `T_sim`
+- $T_{amb}$ : ambient temperature (ºC) → `T_amb`
+- $C$ : effective thermal capacity of the room  
+- $P_{heater}$ : nominal heater power
+- $k_{loss}$ : thermal loss coefficient to the environment
+- $k_{fan}$ : forced-exchange coefficient due to the fan
+- $u_{heater}$ : heater command → `u_heater_cmd`
+- $u_{fan}$ : fan command → `u_fan_cmd`
 
 Rearranging:
 
-\[
+$$
 \frac{dT}{dt} = \frac{1}{C} \left[
 P_{heater} \, u_{heater}
 - k_{loss} (T - T_{amb})
 - k_{fan} \, u_{fan} (T - T_{amb})
 \right]
-\]
+$$
 
 In Simulink, this equation is implemented as follows:
 
-- **Integrator**: integrates \(\frac{dT}{dt}\) and outputs `T_sim`.
-- Calculation of \(T - T_{amb}\) using a `Sum` block of type `+ -`.
+- **Integrator**: integrates $\frac{dT}{dt}$ and outputs `T_sim`.
+- Calculation of $T - T_{amb}$ using a `Sum` block of type `+ -`.
 - Gains representing:
-  - Thermal losses: \(-k_{loss}(T - T_{amb})\)
-  - Fan effect: \(-k_{fan} \, u_{fan} (T - T_{amb})\)
-- Positive heater gain: \(P_{heater} \, u_{heater}\)
-- Sum of all contributions (heating–losses–ventilation) and multiplication by \(1/C\).
+  - Thermal losses: $-k_{loss}(T - T_{amb})$
+  - Fan effect: $-k_{fan} \, u_{fan} (T - T_{amb})$
+- Positive heater gain: $P_{heater} \, u_{heater}$
+- Sum of all contributions (heating–losses–ventilation) and multiplication by $1/C$.
 
 #### Typical Values Used
 
 The parameters can be adjusted according to the desired behavior. During the validation phase, values on the order of the following were tested:
 
-- \(C \in [20, 40]\)  
-- \(k_{loss} \approx 0.05 - 0.1\)
-- \(k_{fan} \approx 0.3 - 0.5\)
-- \(P_{heater} \approx 5 - 15\)
+- $C \in [20, 40]$  
+- $k_{loss} \approx 0.05 - 0.1$
+- $k_{fan} \approx 0.3 - 0.5$
+- $P_{heater} \approx 5 - 15$
 
 These ranges provide noticeable dynamics in 100–300 s simulations.
 
@@ -123,29 +123,29 @@ These ranges provide noticeable dynamics in 100–300 s simulations.
 
 The room relative humidity is modeled as a first-order system that tends toward ambient humidity, with an additional contribution from the humidifier:
 
-\[
+$$
 \frac{dRH}{dt} = -\frac{1}{\tau} (RH - RH_{amb}) + k_{humid} \, u_{humid}
-\]
+$$
 
 where:
 
-- \(RH\) : room relative humidity (%) → `RH_sim`
-- \(RH_{amb}\) : ambient relative humidity (%) → `RH_amb`
-- \(\tau\) : time constant for humidity exchange with the environment
-- \(k_{humid}\) : humidifier gain
-- \(u_{humid}\) : humidifier command → `u_humid_cmd`
+- $RH$ : room relative humidity (%) → `RH_sim`
+- $RH_{amb}$ : ambient relative humidity (%) → `RH_amb`
+- $\tau$ : time constant for humidity exchange with the environment
+- $k_{humid}$ : humidifier gain
+- $u_{humid}$ : humidifier command → `u_humid_cmd`
 
 In Simulink, the structure is analogous to the thermal model:
 
-- **Integrator**: integrates \(\frac{dRH}{dt}\) and outputs `RH_sim`.
-- Calculation of \(RH - RH_{amb}\) with a `Sum` block.
-- Relaxation term toward the environment: \(-\frac{1}{\tau}(RH - RH_{amb})\).
-- Humidity contribution term: \(k_{humid} \, u_{humid}\).
+- **Integrator**: integrates $\frac{dRH}{dt}$ and outputs `RH_sim`.
+- Calculation of $RH - RH_{amb}$ with a `Sum` block.
+- Relaxation term toward the environment: $-\frac{1}{\tau}(RH - RH_{amb})$.
+- Humidity contribution term: $k_{humid} \, u_{humid}$.
 
 #### Typical Values Used
 
-- \(\tau \approx 30 - 60\) s  
-- \(k_{humid} \approx 0.1 - 0.3\)
+- $\tau \approx 30 - 60$ s  
+- $k_{humid} \approx 0.1 - 0.3$
 
 These values make it easy to observe convergence toward `RH_amb` and the increase in humidity when the humidifier is active.
 
@@ -153,14 +153,14 @@ These values make it easy to observe convergence toward `RH_amb` and the increas
 
 ### 3.3 Symbolic Pressure / Flow Dynamics
 
-To provide a simple measure of fan activity, a symbolic magnitude \(P_{sim}\) is defined:
+To provide a simple measure of fan activity, a symbolic magnitude $P_{sim}$ is defined:
 
-\[
+$$
 P_{sim} = k_{P} \, u_{fan}
-\]
+$$
 
 - `P_sim` is implemented with a `Gain` block that multiplies `u_fan_cmd`.
-- \(k_P\) can be set, for example, in the range 1–5 for visualization in the `Scope`.
+- $k_P$ can be set, for example, in the range 1–5 for visualization in the `Scope`.
 
 This output is not intended to be an exact physical pressure measurement, but rather an airflow/ventilation indicator useful for debugging and visualization.
 
@@ -226,11 +226,11 @@ This test confirms that the model does not introduce spurious dynamics when the 
 **Expected behavior:**
 
 - `T_sim` decreases smoothly from 28 °C toward 22 °C.
-- The cooling rate depends on \(C\) and \(k_{loss}\).
+- The cooling rate depends on $C$ and $k_{loss}$.
 - `RH_sim` remains at the initial test condition (if no difference with `RH_amb` is forced in this scenario).
 - `P_sim = 0`.
 
-This test verifies that the loss term \(-k_{loss}(T - T_{amb})\) is correctly implemented and has the correct sign.
+This test verifies that the loss term $-k_{loss}(T - T_{amb})$ is correctly implemented and has the correct sign.
 
 ---
 
@@ -248,10 +248,10 @@ This test verifies that the loss term \(-k_{loss}(T - T_{amb})\) is correctly im
 **Expected behavior:**
 
 - `T_sim` decreases toward 22 °C **faster** than in Test 2.
-- Comparing the `T_sim` curves from Tests 2 and 3 clearly shows the additional effect of \(-k_{fan} u_{fan} (T - T_{amb})\).
+- Comparing the `T_sim` curves from Tests 2 and 3 clearly shows the additional effect of $-k_{fan} u_{fan} (T - T_{amb})$.
 - `P_sim` takes a nonzero value (proportional to `u_fan_cmd`), indicating that the fan is active.
 
-In addition, if `T_sim` starts equal to `T_amb`, the term \((T - T_{amb})` is zero and the fan has no effect on temperature, which is physically consistent.
+In addition, if `T_sim` starts equal to `T_amb`, the term $(T - T_{amb})$ is zero and the fan has no effect on temperature, which is physically consistent.
 
 ---
 
@@ -269,10 +269,10 @@ In addition, if `T_sim` starts equal to `T_amb`, the term \((T - T_{amb})` is ze
 **Expected behavior:**
 
 - `T_sim` increases from 22 °C, initially with an approximately slope:
-  $begin:math:display$
-  \\left\. \\frac\{dT\}\{dt\} \\right\|\_\{t\=0\} \\approx \\frac\{P\_\{heater\}\}\{C\}
-  $end:math:display$
-- As `T_sim` moves away from `T_amb`, the losses \(-k_{loss}(T - T_{amb})\) increase in magnitude and tend to limit the temperature increase.
+  $$
+  \left. \frac{dT}{dt} \right|_{t=0} \approx \frac{P_{heater}}{C}
+  $$
+- As `T_sim` moves away from `T_amb`, the losses $-k_{loss}(T - T_{amb})$ increase in magnitude and tend to limit the temperature increase.
 - By adjusting `P_{heater}` and `C`, a useful dynamic response can be obtained for control tests (neither too slow nor unstable).
 
 ---
@@ -287,7 +287,7 @@ In addition, if `T_sim` starts equal to `T_amb`, the term \((T - T_{amb})` is ze
    - `u_humid_cmd = 0`
    - Initial condition: `RH_sim(0) = 70 %`
 
-   *Expected behavior:* `RH_sim` decreases smoothly from 70 % toward 50 % with an approximate time constant $begin:math:text$\\tau$end:math:text$.
+   *Expected behavior:* `RH_sim` decreases smoothly from 70 % toward 50 % with an approximate time constant $\tau$.
 
 2. **Humidifier contribution**
 
@@ -295,7 +295,7 @@ In addition, if `T_sim` starts equal to `T_amb`, the term \((T - T_{amb})` is ze
    - `u_humid_cmd = 0.5` (for example)
    - Initial condition: `RH_sim(0) = 40 %`
 
-   *Expected behavior:* `RH_sim` increases from 40 %, reaching an equilibrium value that depends on $begin:math:text$\\tau$end:math:text$ and $begin:math:text$k\_\{humid\}$end:math:text$. The system should not diverge; it should stabilize at a humidity level higher than the ambient value.
+   *Expected behavior:* `RH_sim` increases from 40 %, reaching an equilibrium value that depends on $\tau$ and $k_{humid}$. The system should not diverge; it should stabilize at a humidity level higher than the ambient value.
 
 ---
 

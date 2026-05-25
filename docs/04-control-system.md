@@ -17,8 +17,8 @@ Its main role is to:
 
 At this stage of the project, the module is designed for an HVAC system with **heating + ventilation + humidification** in **winter** mode, assuming one important physical limitation:
 
-> The thermal plant does not include an active cooling actuator, so the zone temperature **cannot drop below the ambient temperature \(T_{amb}\)**.  
-> The control strategy focuses on keeping the setpoint above \(T_{amb}\) through heating and ventilation.
+> The thermal plant does not include an active cooling actuator, so the zone temperature **cannot drop below the ambient temperature $T_{amb}$**.  
+> The control strategy focuses on keeping the setpoint above $T_{amb}$ through heating and ventilation.
 
 As future work, the **model extension** is proposed to include a cooling actuator and provide a complete climate control system (heating + cooling).
 
@@ -60,7 +60,7 @@ Internally, `Control_Simulink` is composed of three main subblocks:
 
 1. `Temp_Controller`  
    - Implements a PID controller (used as a PI controller) on the temperature error `error_T`.
-   - Generates an intermediate signal `u_ctrl_T` bounded in the interval \([-1, 1]\).
+   - Generates an intermediate signal `u_ctrl_T` bounded in the interval $[-1, 1]$.
 
 2. `Actuator_Split`  
    - Based on `u_ctrl_T`, distributes the control effort between:
@@ -80,20 +80,20 @@ This structure provides:
 
 The temperature loop is based on:
 
-\[
+$$
 error_T(t) = T_{set}(t) - T_{sim}(t)
-\]
+$$
 
 The `Temp_Controller` subblock implements:
 
 - A **PI** controller in parallel form:
-  \[
+  $$
   u_{\text{PID},T}(t) = K_{p,T}\,error_T(t) + K_{i,T}\int error_T(t)\,dt
-  \]
+  $$
 - With the output saturated to:
-  \[
+  $$
   u_{\text{ctrl\_T}} \in [-1, 1]
-  \]
+  $$
 
 The value `u_ctrl_T` is interpreted as follows:
 
@@ -107,7 +107,7 @@ The Simulink PID block is configured with:
 - Output saturated in [-1, 1].
 - Antiwindup enabled using the block’s built-in method (back-calculation/clamping).
 
-The specific values of \(K_{p,T}\) and \(K_{i,T}\) have been tuned empirically during the Phase 2 tests.
+The specific values of $K_{p,T}$ and $K_{i,T}$ have been tuned empirically during the Phase 2 tests.
 
 > **TODO:** Fill in the final values used in the model (`Kp_T = ...`, `Ki_T = ...`).
 
@@ -118,21 +118,21 @@ Based on the temperature PI output `u_ctrl_T`, the `Actuator_Split` subblock gen
 - For the **heater**:
 
   - `u_ctrl_T` is taken directly and saturated:
-    \[
+    $$
     u_{heater\_sim} = \text{sat}_{[0,1]}(u_{ctrl\_T})
-    \]
+    $$
   - Implemented using a `Saturation` block with limits [0, 1].
 
 - For the **fan**:
 
   - The sign of `u_ctrl_T` is inverted:
-    \[
+    $$
     u_{ctrl\_neg} = -u_{ctrl\_T}
-    \]
+    $$
   - It is saturated in [0, 1]:
-    \[
+    $$
     u_{fan\_sim} = \text{sat}_{[0,1]}(u_{ctrl\_neg})
-    \]
+    $$
 
 This implies:
 
@@ -147,28 +147,28 @@ This implies:
 
 The humidity loop is based on:
 
-\[
+$$
 error_{RH}(t) = RH_{set}(t) - RH_{sim}(t)
-\]
+$$
 
 The `RH_Controller` subblock implements:
 
 - A **PI** controller in parallel form:
-  \[
+  $$
   u_{\text{PID},RH}(t) = K_{p,RH}\,error_{RH}(t) + K_{i,RH}\int error_{RH}(t)\,dt
-  \]
+  $$
 
 - The output is **explicitly saturated** to [0, 1]:
-  \[
+  $$
   u_{humid\_sim} = \text{sat}_{[0,1]}(u_{\text{PID},RH})
-  \]
+  $$
 
 With this saturation:
 
 - If `RH_set > RH_sim` ⇒ the error is positive ⇒ `u_humid_sim` tends to be > 0 and the humidifier turns on.
 - If `RH_set < RH_sim` ⇒ the error is negative ⇒ the output is clipped to 0, because the system does not include a **dehumidification** actuator.
 
-The parameters \(K_{p,RH}\) and \(K_{i,RH}\) are also tuned experimentally.
+The parameters $K_{p,RH}$ and $K_{i,RH}$ are also tuned experimentally.
 
 > **TODO:** Fill in the final values used in the humidity PI controller (`Kp_RH = ...`, `Ki_RH = ...`).
 
@@ -176,21 +176,21 @@ The parameters \(K_{p,RH}\) and \(K_{i,RH}\) are also tuned experimentally.
 
 The humidity dynamics equation used in `MiniHVAC_Zone` has the following form:
 
-\[
+$$
 \frac{dRH}{dt} = -\frac{1}{\tau}(RH - RH_{amb}) + k_{humid}\,u_{humid\_cmd}
-\]
+$$
 
-When the humidifier is off \(u_{humid\_cmd} = 0\), the zone relative humidity naturally tends toward the ambient humidity \(RH_{amb}\). The humidifier action makes it possible to increase relative humidity above \(RH_{amb}\), but the model does not include any **dehumidification** actuator that can actively reduce humidity below \(RH_{amb}\).
+When the humidifier is off $u_{humid\_cmd} = 0$, the zone relative humidity naturally tends toward the ambient humidity $RH_{amb}$. The humidifier action makes it possible to increase relative humidity above $RH_{amb}$, but the model does not include any **dehumidification** actuator that can actively reduce humidity below $RH_{amb}$.
 
 This implies a physical limitation analogous to the temperature limitation:
 
-- The system can match or exceed \(RH_{amb}\) thanks to the humidifier.
-- It cannot sustain a humidity setpoint far below \(RH_{amb}\), because without drying actuators, the dynamics will always tend toward the ambient humidity.
+- The system can match or exceed $RH_{amb}$ thanks to the humidifier.
+- It cannot sustain a humidity setpoint far below $RH_{amb}$, because without drying actuators, the dynamics will always tend toward the ambient humidity.
 
 Therefore, the main use case considered in this phase is **winter with dry ambient conditions**, where:
 
-- \(RH_{amb}\) is relatively low.
-- The control objective is to **increase** the zone humidity to reach a comfort value \(RH_{set}\) such that \(RH_{set} \ge RH_{amb}\).
+- $RH_{amb}$ is relatively low.
+- The control objective is to **increase** the zone humidity to reach a comfort value $RH_{set}$ such that $RH_{set} \ge RH_{amb}$.
 
 In the humidity loop tests, setpoints consistent with this physical limitation have been selected so that the system can reach the reference value or approach it reasonably well.
 
@@ -198,13 +198,13 @@ In the humidity loop tests, setpoints consistent with this physical limitation h
 
 Analogously to the extension proposed for temperature, one possible improvement to the model would be to add a dehumidification actuator `u_dehum_cmd`, with an additional term in the humidity equation:
 
-\[
+$$
 \frac{dRH}{dt} = -\frac{1}{\tau}(RH - RH_{amb}) + k_{humid}u_{humid\_cmd} - k_{dehum}u_{dehum\_cmd}
-\]
+$$
 
 This extension would make it possible to:
 
-- Reach and maintain humidity setpoints both above and below \(RH_{amb}\).
+- Reach and maintain humidity setpoints both above and below $RH_{amb}$.
 - Implement a more complete humidity controller, where the positive part of the control action acts on the humidifier and the negative part acts on the dehumidifier.
 
 > *(This improvement is considered future work, aligned with a possible Phase 3 of the project in which the zone hygrometric conditioning model would be completed.)*
@@ -217,10 +217,10 @@ To evolve the model toward a complete HVAC system (heating and cooling), the fol
 - Add a new actuator `u_cool_cmd` and an associated power `P_cool`.
 - Modify the temperature dynamics equation of `MiniHVAC_Zone` to:
 
-\[
+$$
 C\frac{dT}{dt} = P_{heater}u_{heater\_cmd} - P_{cool}u_{cool\_cmd}
 - k_{loss}(T - T_{amb}) - k_{fan}u_{fan\_cmd}(T - T_{amb})
-\]
+$$
 
 - Adapt `Control_Simulink` so that the output `u_ctrl_T` is distributed between the heater and the cooling actuator, while keeping the fan as an auxiliary actuator.
 
@@ -327,7 +327,7 @@ The specific objectives of the tests were:
 
 - The test results indicate that the temperature loop is **stable** and meets the objective of keeping the zone around the setpoint when it is above `T_amb`.
 - The humidity loop behaves consistently with the simplified model (humidification only).
-- Empirical tuning of the \(K_p\) and \(K_i\) parameters has been carried out to improve:
+- Empirical tuning of the $K_p$ and $K_i$ parameters has been carried out to improve:
   - Settling time.
   - Absence of oscillations.
   - Reduction of prolonged saturation.
